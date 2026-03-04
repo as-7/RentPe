@@ -10,8 +10,15 @@ import os
 def init_firebase():
     if not firebase_admin._apps:
         try:
-            # We assume the service account key path will be set via Environment Variable
-            # Defaulting to checking root folder
+            # Option 1: JSON string in env var (preferred for production/Railway)
+            json_str = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
+            if json_str:
+                import json
+                cred = credentials.Certificate(json.loads(json_str))
+                firebase_admin.initialize_app(cred)
+                return
+            
+            # Option 2: Path to file (local development)
             key_path = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "serviceAccountKey.json")
             if os.path.exists(key_path):
                 cred = credentials.Certificate(key_path)
