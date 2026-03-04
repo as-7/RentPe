@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from typing import List
+from sqlalchemy import desc, select
+from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.billing import ElectricityReading as ElectricityModel, CustomCharge as ChargeModel
@@ -17,6 +17,31 @@ async def add_electricity_reading(reading_in: ElectricityReadingCreate, db: Asyn
     await db.commit()
     await db.refresh(db_reading)
     return db_reading
+
+@router.put("/electricity/{reading_id}", response_model=ElectricityReadingResponse)
+async def update_electricity_reading(reading_id: int, reading_in: ElectricityReadingCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(ElectricityModel).where(ElectricityModel.id == reading_id))
+    db_reading = result.scalars().first()
+    if not db_reading:
+        raise HTTPException(status_code=404, detail="Reading not found")
+    
+    update_data = reading_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_reading, key, value)
+    
+    await db.commit()
+    await db.refresh(db_reading)
+    return db_reading
+
+@router.get("/electricity/latest/{room_id}", response_model=Optional[ElectricityReadingResponse])
+async def get_latest_electricity_reading(room_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(ElectricityModel)
+        .where(ElectricityModel.room_id == room_id)
+        .order_by(desc(ElectricityModel.reading_date))
+        .limit(1)
+    )
+    return result.scalars().first()
 
 @router.post("/charges", response_model=CustomChargeResponse)
 async def add_custom_charge(charge_in: CustomChargeCreate, db: AsyncSession = Depends(get_db)):

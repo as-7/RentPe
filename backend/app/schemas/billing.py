@@ -46,6 +46,8 @@ class InvoiceBase(BaseModel):
     
     basic_rent: float
     water_charge: float = 0.0
+    cleaning_charge: float = 0.0
+    other_charges: float = 0.0
     electricity_charge: float = 0.0
     custom_charges_total: float = 0.0
     total_amount_due: float
@@ -68,6 +70,8 @@ class RentCalculationPreview(BaseModel):
     room_id: int
     basic_rent: float
     water_charge: float
+    cleaning_charge: float
+    other_charges: float
     electricity_units_consumed: float
     electricity_cost: float
     custom_charges: List[CustomChargeResponse]

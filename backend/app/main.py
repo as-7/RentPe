@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+import time
+
 from app.core.config import settings
 from app.api.endpoints import users
 from app.services.scheduler import start_scheduler
@@ -18,10 +20,33 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = (time.time() - start_time) * 1000
+    print(f"[RentPe API] {request.method} {request.url.path} - {response.status_code} ({process_time:.2f}ms)")
+    return response
+
 # Set all CORS enabled origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Update for production!
+    allow_origins=[
+        "http://localhost:8081",
+        "http://localhost:8082",
+        "http://127.0.0.1:8081",
+        "http://127.0.0.1:8082",
+        "http://localhost:19006",
+        "http://127.0.0.1:19006",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://rentpe.org",
+        "https://www.rentpe.org",
+        "https://rentpe.org/",
+        "https://www.rentpe.org/"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

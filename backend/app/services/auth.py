@@ -32,7 +32,7 @@ def verify_firebase_token(id_token: str) -> Optional[dict]:
         decoded_token = firebase_auth.verify_id_token(id_token)
         return decoded_token
     except Exception as e:
-        print(f"Firebase token verification failed: {e}")
+        print(f"Firebase token verification failed (Detailed Error): {e}")
         return None
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

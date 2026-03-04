@@ -41,6 +41,8 @@ class Invoice(Base):
     # Breakdown lines
     basic_rent = Column(Float, nullable=False)
     water_charge = Column(Float, default=0.0)
+    cleaning_charge = Column(Float, default=0.0)
+    other_charges = Column(Float, default=0.0)
     electricity_charge = Column(Float, default=0.0)
     custom_charges_total = Column(Float, default=0.0)
     

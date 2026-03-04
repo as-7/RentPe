@@ -6,7 +6,9 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, unique=True, index=True, nullable=False)
+    firebase_uid = Column(String, unique=True, index=True, nullable=True)
+    phone_number = Column(String, unique=True, index=True, nullable=True)
+    email = Column(String, unique=True, index=True, nullable=True)
     full_name = Column(String, nullable=True)
     role = Column(String, default="tenant", nullable=False) # 'landlord' or 'tenant'
     is_active = Column(Boolean, default=True)
