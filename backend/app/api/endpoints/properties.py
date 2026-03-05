@@ -72,9 +72,16 @@ async def bulk_create_property(property_in: PropertyBulkCreate, db: AsyncSession
         
     db.add_all(rooms_to_create)
     await db.commit()
-    await db.refresh(db_property)
     
-    response = PropertyResponse.model_validate(db_property)
+    # Eagerly load the property with its new rooms to avoid Pydantic MissingGreenlet error
+    result = await db.execute(
+        select(PropertyModel)
+        .options(selectinload(PropertyModel.rooms))
+        .where(PropertyModel.id == db_property.id)
+    )
+    db_property_reloaded = result.scalars().first()
+    
+    response = PropertyResponse.model_validate(db_property_reloaded)
     response.total_rooms = len(rooms_to_create)
     response.vacant_rooms = sum(1 for r in rooms_to_create if r.is_vacant)
     return response
@@ -188,3 +195,14 @@ async def update_property(property_id: int, property_in: PropertyUpdate, db: Asy
     response.rooms = enriched_rooms
     
     return response
+
+@router.delete("/{property_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_property(property_id: int, db: AsyncSession = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    result = await db.execute(select(PropertyModel).where(PropertyModel.id == property_id, PropertyModel.landlord_id == current_user.id))
+    db_property = result.scalars().first()
+    if not db_property:
+        raise HTTPException(status_code=404, detail="Property not found")
+    
+    await db.delete(db_property)
+    await db.commit()
+    return None

@@ -81,3 +81,14 @@ async def update_room(room_id: int, room_in: RoomUpdate, db: AsyncSession = Depe
     prop = prop_result.scalars().first()
     
     return await enrich_room_billing(db, db_room, prop)
+
+@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_room(room_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RoomModel).where(RoomModel.id == room_id))
+    db_room = result.scalars().first()
+    if not db_room:
+        raise HTTPException(status_code=404, detail="Room not found")
+        
+    await db.delete(db_room)
+    await db.commit()
+    return None
