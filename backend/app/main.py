@@ -38,14 +38,13 @@ app.add_middleware(
         "http://127.0.0.1:8082",
         "http://localhost:19006",
         "http://127.0.0.1:19006",
+        "https://rentpe.org",
+        "https://www.rentpe.org",
+        "https://rentpe17.vercel.app", # backup domain
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
-        "http://127.0.0.1:8000",
-        "https://rentpe.org",
-        "https://www.rentpe.org",
-        "https://rentpe.org/",
-        "https://www.rentpe.org/"
+        "http://127.0.0.1:8000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
