@@ -159,7 +159,15 @@ async def get_dashboard(
             "name": p.name,
             "address": p.address,
             "total_rooms": len(r_all),
-            "vacant_rooms": sum(1 for r in r_all if r.is_vacant)
+            "vacant_rooms": sum(1 for r in r_all if r.is_vacant),
+            "landlord_id": p.landlord_id,
+            "created_at": p.created_at,
+            "electricity_per_unit_cost": p.electricity_per_unit_cost,
+            "water_charge": p.water_charge,
+            "cleaning_charge": p.cleaning_charge,
+            "other_charges": p.other_charges,
+            "billing_due_date": p.billing_due_date,
+            "rooms": []
         })
 
     return {

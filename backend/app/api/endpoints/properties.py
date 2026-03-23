@@ -74,6 +74,7 @@ async def bulk_create_property(property_in: PropertyBulkCreate, db: AsyncSession
     await db.commit()
     
     # Eagerly load the property with its new rooms to avoid Pydantic MissingGreenlet error
+    await db.refresh(db_property)
     result = await db.execute(
         select(PropertyModel)
         .options(selectinload(PropertyModel.rooms))
