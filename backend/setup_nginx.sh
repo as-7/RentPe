@@ -7,7 +7,7 @@ echo "========================================="
 
 # ── 1. Install Certbot for Amazon Linux 2023 ──
 echo "[1/4] Installing Certbot..."
-sudo python3 -m venv /opt/certbot/
+sudo python3.11 -m venv /opt/certbot/
 sudo /opt/certbot/bin/pip install --upgrade pip
 sudo /opt/certbot/bin/pip install certbot certbot-nginx
 sudo ln -sf /opt/certbot/bin/certbot /usr/bin/certbot

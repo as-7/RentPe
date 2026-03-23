@@ -10,8 +10,8 @@ echo "[1/8] Updating system packages..."
 sudo yum update -y
 
 # ── 2. Install Dependencies ──
-echo "[2/8] Installing Python, Nginx, Git..."
-sudo yum install -y python3 python3-pip git nginx
+echo "[2/8] Installing Python 3.11, Nginx, Git..."
+sudo yum install -y python3.11 python3.11-pip git nginx
 # Amazon Linux 2023 provides python3 and pip by default.
 
 # ── 3. Clone Repository ──
@@ -28,7 +28,7 @@ fi
 # ── 4. Setup Python Virtual Environment ──
 echo "[4/8] Setting up Python virtual environment..."
 cd backend
-python3 -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
