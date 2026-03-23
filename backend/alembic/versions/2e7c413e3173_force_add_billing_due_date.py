@@ -20,7 +20,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    pass
+    op.execute("ALTER TABLE properties ADD COLUMN IF NOT EXISTS billing_due_date INTEGER NOT NULL DEFAULT 1;")
 
 
 def downgrade() -> None:
