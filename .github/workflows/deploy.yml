@@ -18,5 +18,5 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          chmod +x /home/ubuntu/RentPe/backend/deploy.sh
-          bash /home/ubuntu/RentPe/backend/deploy.sh
+          chmod +x /home/ec2-user/RentPe/backend/deploy.sh
+          bash /home/ec2-user/RentPe/backend/deploy.sh

@@ -2,14 +2,24 @@
 set -e
 
 echo "========================================="
-echo "  RentPe Nginx + SSL Setup"
+echo "  RentPe Nginx + SSL Setup (Amazon Linux)"
 echo "========================================="
 
+# ── 1. Install Certbot for Amazon Linux 2023 ──
+echo "[1/4] Installing Certbot..."
+sudo python3 -m venv /opt/certbot/
+sudo /opt/certbot/bin/pip install --upgrade pip
+sudo /opt/certbot/bin/pip install certbot certbot-nginx
+sudo ln -sf /opt/certbot/bin/certbot /usr/bin/certbot
+
 # ── Nginx Config ──
-echo "[1/3] Configuring Nginx reverse proxy..."
-sudo tee /etc/nginx/sites-available/rentpe > /dev/null << 'NGINXEOF'
+echo "[2/4] Configuring Nginx reverse proxy..."
+
+# Amazon Linux nginx config is placed directly in conf.d
+sudo tee /etc/nginx/conf.d/rentpe.conf > /dev/null << 'NGINXEOF'
 server {
     server_name api.rentpe.org;
+    listen 80;
 
     location / {
         proxy_pass http://127.0.0.1:8000;
@@ -23,13 +33,12 @@ server {
 }
 NGINXEOF
 
-sudo ln -sf /etc/nginx/sites-available/rentpe /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-
-echo "[2/3] Testing and reloading Nginx..."
+echo "[3/4] Testing and starting Nginx..."
+sudo systemctl enable nginx
+sudo systemctl start nginx
 sudo nginx -t && sudo systemctl reload nginx
 
-echo "[3/3] Setting up SSL certificate..."
+echo "[4/4] Setting up SSL certificate..."
 echo "  → This will ask for your email and agreement to Let's Encrypt terms"
 sudo certbot --nginx -d api.rentpe.org
 

@@ -2,20 +2,21 @@
 set -e
 
 echo "========================================="
-echo "  RentPe EC2 Server Setup Script"
+echo "  RentPe EC2 Server Setup Script (Amazon Linux)"
 echo "========================================="
 
 # ── 1. System Update ──
 echo "[1/8] Updating system packages..."
-sudo apt update && sudo apt upgrade -y
+sudo yum update -y
 
 # ── 2. Install Dependencies ──
-echo "[2/8] Installing Python, Nginx, Certbot, Git..."
-sudo apt install -y python3 python3-venv python3-pip nginx certbot python3-certbot-nginx git
+echo "[2/8] Installing Python, Nginx, Git..."
+sudo yum install -y python3 python3-pip git nginx
+# Amazon Linux 2023 provides python3 and pip by default.
 
 # ── 3. Clone Repository ──
 echo "[3/8] Cloning RentPe repository..."
-cd /home/ubuntu
+cd /home/ec2-user
 if [ -d "RentPe" ]; then
     echo "  → RentPe directory exists, pulling latest..."
     cd RentPe && git pull origin main
@@ -45,8 +46,8 @@ DATABASE_URL=postgresql+asyncpg://postgres.hlwggvtdjdxeypdowftq:YOUR_SUPABASE_PA
 SECRET_KEY=CHANGE_ME_TO_A_RANDOM_64_CHAR_STRING
 FIREBASE_SERVICE_ACCOUNT_KEY=serviceAccountKey.json
 ENVEOF
-echo "  → .env file created at /home/ubuntu/RentPe/backend/.env"
-echo "  → EDIT IT NOW: nano /home/ubuntu/RentPe/backend/.env"
+echo "  → .env file created at /home/ec2-user/RentPe/backend/.env"
+echo "  → EDIT IT NOW: nano /home/ec2-user/RentPe/backend/.env"
 echo "  → Replace YOUR_SUPABASE_PASSWORD with the real password"
 echo "  → Replace CHANGE_ME with: python3 -c \"import secrets; print(secrets.token_hex(32))\""
 else
@@ -59,7 +60,7 @@ echo "[6/8] Firebase Service Account Key"
 if [ ! -f serviceAccountKey.json ]; then
     echo "  ⚠️  serviceAccountKey.json NOT FOUND!"
     echo "  → Copy it from your local machine:"
-    echo "  → scp -i your-key.pem /path/to/serviceAccountKey.json ubuntu@<EC2_IP>:/home/ubuntu/RentPe/backend/"
+    echo "  → scp -i your-key.pem /path/to/serviceAccountKey.json ec2-user@<EC2_IP>:/home/ec2-user/RentPe/backend/"
 else
     echo "  → serviceAccountKey.json found ✓"
 fi
@@ -69,7 +70,7 @@ echo ""
 echo "[7/8] Running database migrations..."
 echo "  (This will fail if .env is not configured — that's OK, run manually after)"
 source venv/bin/activate
-alembic upgrade heads 2>/dev/null && echo "  → Migrations complete ✓" || echo "  → Migrations skipped (configure .env first, then run: cd /home/ubuntu/RentPe/backend && source venv/bin/activate && alembic upgrade heads)"
+alembic upgrade heads 2>/dev/null && echo "  → Migrations complete ✓" || echo "  → Migrations skipped (configure .env first, then run: cd /home/ec2-user/RentPe/backend && source venv/bin/activate && alembic upgrade heads)"
 
 # ── 8. Setup Systemd Service ──
 echo ""
@@ -80,11 +81,11 @@ Description=RentPe FastAPI Backend
 After=network.target
 
 [Service]
-User=ubuntu
-WorkingDirectory=/home/ubuntu/RentPe/backend
-Environment="PATH=/home/ubuntu/RentPe/backend/venv/bin"
-EnvironmentFile=/home/ubuntu/RentPe/backend/.env
-ExecStart=/home/ubuntu/RentPe/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+User=ec2-user
+WorkingDirectory=/home/ec2-user/RentPe/backend
+Environment="PATH=/home/ec2-user/RentPe/backend/venv/bin"
+EnvironmentFile=/home/ec2-user/RentPe/backend/.env
+ExecStart=/home/ec2-user/RentPe/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
 Restart=always
 RestartSec=3
 
@@ -100,10 +101,10 @@ echo "========================================="
 echo "  Setup Complete! Next Steps:"
 echo "========================================="
 echo ""
-echo "  1. Edit .env:        nano /home/ubuntu/RentPe/backend/.env"
-echo "  2. Copy Firebase key: scp serviceAccountKey.json to /home/ubuntu/RentPe/backend/"
-echo "  3. Run migrations:   cd /home/ubuntu/RentPe/backend && source venv/bin/activate && alembic upgrade heads"
+echo "  1. Edit .env:        nano /home/ec2-user/RentPe/backend/.env"
+echo "  2. Copy Firebase key: scp serviceAccountKey.json to /home/ec2-user/RentPe/backend/"
+echo "  3. Run migrations:   cd /home/ec2-user/RentPe/backend && source venv/bin/activate && alembic upgrade heads"
 echo "  4. Start service:    sudo systemctl start rentpe"
 echo "  5. Check status:     sudo systemctl status rentpe"
-echo "  6. Run nginx setup:  bash /home/ubuntu/RentPe/backend/setup_nginx.sh"
+echo "  6. Run nginx setup:  bash /home/ec2-user/RentPe/backend/setup_nginx.sh"
 echo ""

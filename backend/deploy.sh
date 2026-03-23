@@ -5,7 +5,7 @@ echo "========================================="
 echo "  RentPe Auto-Deploy (triggered by push)"
 echo "========================================="
 
-cd /home/ubuntu/RentPe
+cd /home/ec2-user/RentPe
 
 # Pull latest code
 echo "[1/4] Pulling latest code..."
