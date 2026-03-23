@@ -13,6 +13,7 @@ class Room(Base):
     other_charges = Column(Float, default=0.0)
     is_vacant = Column(Boolean, default=False)
     tenant_name = Column(String, nullable=True)
+    tenant_mobile = Column(String, nullable=True)
     
     property_id = Column(Integer, ForeignKey("properties.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())

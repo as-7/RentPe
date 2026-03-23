@@ -10,6 +10,7 @@ from app.models.lease import Lease
 from app.models.billing import ElectricityReading, CustomCharge, Invoice
 from app.schemas.billing import RentCalculationPreview
 from app.schemas.room import RoomResponse
+from app.services.dates import due_datetime_for_reference
 
 async def calculate_room_rent(db: AsyncSession, property_id: int, room_id: int) -> RentCalculationPreview:
     # 1. Fetch Property and Room
@@ -75,14 +76,19 @@ async def generate_invoice_for_room(db: AsyncSession, property_id: int, room_id:
     
     if not lease:
         return None  # Room is vacant, no invoice needed
-        
+
+    property_query = await db.execute(select(Property).where(Property.id == property_id))
+    property_obj = property_query.scalars().first()
+    if not property_obj:
+        raise ValueError("Property not found")
+
     preview = await calculate_room_rent(db, property_id, room_id)
     
     now = datetime.now(timezone.utc)
-    # Simple logic: billing cycle is for the past month, due date is 5 days from generation
+    # Billing cycle is for the past month, and invoice due date follows the property's configured due day.
     billing_start = (now.replace(day=1) - timedelta(days=1)).replace(day=1) 
     billing_end = now
-    due_date = now + timedelta(days=5)
+    due_date = due_datetime_for_reference(now, property_obj.billing_due_date or 1)
 
     invoice = Invoice(
         tenant_id=lease.tenant_id,

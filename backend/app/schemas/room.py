@@ -10,6 +10,7 @@ class RoomBase(BaseModel):
     other_charges: Optional[float] = 0.0
     is_vacant: bool = False
     tenant_name: Optional[str] = None
+    tenant_mobile: Optional[str] = None
 
 class RoomCreate(RoomBase):
     property_id: int
@@ -22,6 +23,7 @@ class RoomUpdate(BaseModel):
     other_charges: Optional[float] = None
     is_vacant: Optional[bool] = None
     tenant_name: Optional[str] = None
+    tenant_mobile: Optional[str] = None
     last_reading: Optional[float] = None # For quick entry initialization
 
 class RoomInDBBase(RoomBase):

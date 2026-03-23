@@ -12,6 +12,19 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "super-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+
+    APP_TIMEZONE: str = "Asia/Kolkata"
+
+    WHATSAPP_ENABLED: bool = False
+    WHATSAPP_GRAPH_VERSION: str = "v23.0"
+    WHATSAPP_PHONE_NUMBER_ID: str = ""
+    WHATSAPP_ACCESS_TOKEN: str = ""
+    WHATSAPP_TEMPLATE_NAME: str = ""
+    WHATSAPP_TEMPLATE_LANGUAGE: str = "en"
+    WHATSAPP_DEFAULT_COUNTRY_CODE: str = "91"
+    WHATSAPP_REMINDER_OFFSETS: str = "3,1,0"
+    WHATSAPP_REMINDER_HOUR: int = 9
+    WHATSAPP_REMINDER_MINUTE: int = 0
     
     class Config:
         env_file = ".env"

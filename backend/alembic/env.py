@@ -71,7 +71,7 @@ async def run_async_migrations() -> None:
     """
     
     # Overwrite the ini-file sqlalchemy.url path with the path given in the app configuration
-    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace('%', '%%'))
 
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),

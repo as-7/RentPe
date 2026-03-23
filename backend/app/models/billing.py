@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, func, Boolean
+from sqlalchemy import Column, Integer, String, Float, DateTime, Date, ForeignKey, func, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -55,4 +55,22 @@ class Invoice(Base):
 
     # Relationships
     tenant = relationship("User")
+    room = relationship("Room")
+
+
+class ReminderLog(Base):
+    __tablename__ = "reminder_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), index=True, nullable=False)
+    room_id = Column(Integer, ForeignKey("rooms.id"), index=True, nullable=False)
+    target_due_date = Column(Date, nullable=False, index=True)
+    days_before_due = Column(Integer, nullable=False)
+    tenant_mobile = Column(String, nullable=False)
+    status = Column(String, default="sent", nullable=False)
+    provider_message_id = Column(String, nullable=True)
+    error_message = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    property = relationship("Property")
     room = relationship("Room")

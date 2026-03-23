@@ -5,8 +5,12 @@ from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.billing import ElectricityReading as ElectricityModel, CustomCharge as ChargeModel
+from app.models.property import Property as PropertyModel
+from app.models.user import User as UserModel
+from app.api.deps import get_current_user
 from app.schemas.billing import ElectricityReadingCreate, ElectricityReadingResponse, CustomChargeCreate, CustomChargeResponse, RentCalculationPreview, InvoiceResponse
 from app.services.billing import calculate_room_rent, generate_invoice_for_room
+from app.services.reminders import send_due_date_reminders
 
 router = APIRouter()
 
@@ -68,3 +72,26 @@ async def generate_invoice(property_id: int, room_id: int, db: AsyncSession = De
         return invoice
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/reminders/send")
+async def send_whatsapp_reminders(
+    property_id: Optional[int] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    if property_id is not None:
+        property_result = await db.execute(
+            select(PropertyModel).where(
+                PropertyModel.id == property_id,
+                PropertyModel.landlord_id == current_user.id,
+            )
+        )
+        property_obj = property_result.scalars().first()
+        if not property_obj:
+            raise HTTPException(status_code=404, detail="Property not found")
+
+    try:
+        return await send_due_date_reminders(db, landlord_id=current_user.id, property_id=property_id)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
